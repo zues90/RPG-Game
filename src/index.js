@@ -94,6 +94,12 @@ const locations = [
 		"button function": [restart, restart, restart],
 		text: "You defete the dragon! YOU WIN THE GAME.",
 	},
+	{
+		name: "easter egg",
+		"button text": ["2", "8", "Go to town square"],
+		"button function": [pickTwo, PickEight, goTown],
+		text: "You find a secret game. Pick a number above. Ten numbers will be randomly chosen between 0 and 10. If the number you choose matches one of the random numbers, you win!.",
+	},
 ];
 
 const button1 = document.getElementById("button1");
@@ -206,7 +212,12 @@ function attack() {
 	text.innerText = "The " + monsters[fighting].name + ".";
 	text.innerText +=
 		" You attack it with your " + Weapons[currentWeapon].name + ".";
-	health -= monsters[fighting].level;
+	if (isMonsterHit()) {
+		health -= getMonsterAttackValue(monsters[fighting].level);
+	} else {
+		text.innerText = "You miss.";
+	}
+
 	monsterHealth -=
 		Weapons[currentWeapon].power + Math.floor(Math.random() * xp) + 1;
 	healthText.innerText = health;
@@ -216,7 +227,22 @@ function attack() {
 	} else if (monsterHealth <= 0) {
 		fighting === 2 ? winGame() : defetMonster();
 	}
+	if (Math.random() <= 0.1 && inventory.length !== 1) {
+		text.innerText += " Your " + inventory.pop() + "breaks.";
+		currentWeapon--;
+	}
 }
+
+function getMonsterAttackValue(level) {
+	let hit = level * 5 - Math.floor(Math.random() * xp);
+	// console.log(hit);
+	return hit;
+}
+
+function isMonsterHit() {
+	return Math.random() > 0.2 || health < 20;
+}
+
 function doge() {
 	text.innerText = "You doge the attack from the " + monsters[fighting].name;
 }
@@ -245,4 +271,33 @@ function restart() {
 	healthText.innerText = health;
 	xpText.innerText = xp;
 	goTown();
+}
+
+function easterEgg() {
+	update(locations[7]);
+}
+
+function pickTwo() {
+	pick(2);
+}
+
+function pickEight() {
+	pick(8);
+}
+
+function pick(guess) {
+	let numbers = [];
+	while (numbers.length < 10) {
+		numbers.push(Math.floor(Math.random() * 11));
+	}
+	text.innerText = "You picked " + guess + ". Here are the rendom numbers:\n";
+
+	for (let i = 0; i < 10; i++) {
+		text.innerText += numbers[i] + "\n";
+	}
+	if (numbers.indexOf(guess) !== -1) {
+		text.innerText += "Right! You win 20 gold!";
+		gold += 20;
+		goldText.innerText = gold;
+	}
 }
